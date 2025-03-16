@@ -22,6 +22,8 @@ yarn add react-compose-layout
 - React ^18.3.1
 - Node.js >=20.0.0
 
+The library has been tested against React Router v6 but does not directly depend on it. React Router is an optional peer dependency that you can install if you need routing capabilities.
+
 ## Usage
 
 ### 1. Wrap your app with PageLayoutProvider
@@ -41,13 +43,16 @@ function App() {
 Create your layout component as you normally would:
 
 ```jsx
-function MainLayout({ children }) {
+function MainLayout({ children, title }) {
   return (
     <div>
       <header>
         <nav>{/* Your navigation */}</nav>
       </header>
-      <main>{children}</main>
+      <main>
+        <h1>{title}</h1>
+        {children}
+      </main>
       <footer>{/* Your footer */}</footer>
     </div>
   );
@@ -66,13 +71,13 @@ const Layout = createPageLayout({ Component: MainLayout });
 
 ### 4. Use the Layout in Your Pages
 
-Apply the layout to your pages:
+Apply the layout to your pages and pass any props it needs:
 
 ```jsx
 function HomePage() {
   return (
-    <Layout>
-      <h1>Welcome to the Home Page</h1>
+    <Layout title="Welcome to the Home Page">
+      <p>This is our homepage content</p>
       {/* Your page content */}
     </Layout>
   );
@@ -80,29 +85,37 @@ function HomePage() {
 
 function AboutPage() {
   return (
-    <Layout>
-      <h1>About Us</h1>
+    <Layout title="About Us">
+      <p>Learn more about our company</p>
       {/* Your page content */}
     </Layout>
   );
 }
 ```
 
-### Example with React Router (Optional)
+### Example with React Router (Recommended)
 
-The library can be optionally used with React Router:
+For proper integration with React Router, you'll need to use the `PageRenderOutlet` component along with React Router's `Outlet`. Note that `PageRenderOutlet` can also be used without React Router in other scenarios where you need to control layout rendering:
 
 ```jsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { PageLayoutProvider } from "react-compose-layout";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { PageLayoutProvider, PageRenderOutlet } from "react-compose-layout";
 
 function App() {
   return (
     <BrowserRouter>
       <PageLayoutProvider>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
+          <Route
+            element={
+              <PageRenderOutlet>
+                <Outlet />
+              </PageRenderOutlet>
+            }
+          >
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+          </Route>
         </Routes>
       </PageLayoutProvider>
     </BrowserRouter>
@@ -112,7 +125,7 @@ function App() {
 
 ## How It Works
 
-The library uses React's Context API to manage layouts efficiently. When you switch between pages that use the same layout, the layout component doesn't remount, improving performance and maintaining layout state.
+The library uses React's Context API to manage layouts efficiently. When you switch between pages that use the same layout, the layout component doesn't remount, improving performance and maintaining layout state. This is achieved through the `PageLayoutProvider` and `PageRenderOutlet` components working together to manage the layout lifecycle.
 
 ## API Reference
 

@@ -27,20 +27,34 @@ export function createPageLayout({ Component }) {
   return LayoutSync;
 }
 
-export function PageLayoutProvider({ children }) {
-  const [currentPageLayoutWithProps, setCurrentPageLayoutWithProps] =
-    useState(null);
+export function PageRenderOutlet({ children }) {
+  const { currentPageLayoutWithProps } = useContext(LayoutContext);
 
   const CurrentLayout =
     currentPageLayoutWithProps && layouts[currentPageLayoutWithProps.name];
 
   return (
+    <>
+      {CurrentLayout ? (
+        <CurrentLayout {...currentPageLayoutWithProps.props} />
+      ) : null}
+      {children}
+    </>
+  );
+}
+
+export function PageLayoutProvider({ children }) {
+  const [currentPageLayoutWithProps, setCurrentPageLayoutWithProps] =
+    useState(null);
+
+  return (
     <LayoutContext.Provider
-      value={{ setCurrentPageLayoutWithProps, registerPageLayout }}
+      value={{
+        setCurrentPageLayoutWithProps,
+        currentPageLayoutWithProps,
+        registerPageLayout,
+      }}
     >
-      {currentPageLayoutWithProps && (
-        <CurrentLayout {...currentPageLayoutWithProps.props}></CurrentLayout>
-      )}
       {children}
     </LayoutContext.Provider>
   );
